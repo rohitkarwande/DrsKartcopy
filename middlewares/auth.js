@@ -1,8 +1,8 @@
-const authService = require('../services/auth/authService');
+const { tokenService } = require('../services/auth/tokenService');
 
 const authMiddleware = async (req, res, next) => {
     try {
-        const user = await authService.authenticateFromHeader(req.headers.authorization);
+        const user = await tokenService.authenticateFromHeader(req.headers.authorization);
         req.user = user;
         next();
     } catch (error) {

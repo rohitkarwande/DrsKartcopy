@@ -45,33 +45,6 @@ class FeatureFlagService {
             return false;
         }
     }
-
-    /**
-     * Update feature flag status (Admin)
-     */
-    async updateFeatureFlag(key, is_enabled) {
-        if (typeof is_enabled !== 'boolean') {
-            const err = new Error('is_enabled must be a boolean');
-            err.statusCode = 400;
-            throw err;
-        }
-
-        const result = await db.query(
-            `UPDATE feature_flags 
-             SET is_enabled = $1, updated_at = CURRENT_TIMESTAMP 
-             WHERE key = $2 
-             RETURNING *`,
-            [is_enabled, key]
-        );
-
-        if (result.rows.length === 0) {
-            const err = new Error(`Feature flag '${key}' not found`);
-            err.statusCode = 404;
-            throw err;
-        }
-
-        return result.rows[0];
-    }
 }
 
 module.exports = new FeatureFlagService();

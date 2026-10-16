@@ -1,6 +1,9 @@
 const db = require('../../config/db');
-const { sendNotification } = require('../notifications/notificationService');
 
+/**
+ * LegalService
+ * Handles user legal consultation query submissions and tracking
+ */
 class LegalService {
     async submitQuery(userId, { subject, description, contact_phone }) {
         if (!subject || !description) {
@@ -22,44 +25,6 @@ class LegalService {
             [userId]
         );
         return result.rows;
-    }
-
-    async getAllQueries() {
-        const result = await db.query(
-            "SELECT * FROM legal_consultations ORDER BY created_at DESC"
-        );
-        return result.rows;
-    }
-
-    async updateQueryStatus(id, status) {
-        if (!['New', 'Reviewing', 'Resolved'].includes(status)) {
-            const err = new Error('Invalid status');
-            err.statusCode = 400;
-            throw err;
-        }
-
-        const result = await db.query(
-            "UPDATE legal_consultations SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *",
-            [status, id]
-        );
-
-        if (result.rows.length === 0) {
-            const err = new Error('Legal query not found');
-            err.statusCode = 404;
-            throw err;
-        }
-
-        const query = result.rows[0];
-
-        // Notification dispatch
-        await sendNotification(
-            query.user_id,
-            'Legal Query Update',
-            `The status of your legal query "${query.subject}" has been updated to ${status}.`,
-            query.id.toString()
-        );
-
-        return query;
     }
 }
 

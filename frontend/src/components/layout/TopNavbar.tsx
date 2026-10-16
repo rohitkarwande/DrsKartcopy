@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Search, PlusCircle, LayoutDashboard, MessageSquare, Package, LogOut, ShieldCheck, Shield, Sun, Moon, User as UserIcon, LifeBuoy } from "lucide-react";
+import { Search, PlusCircle, LayoutDashboard, MessageSquare, Package, LogOut, ShieldCheck, Sun, Moon, User as UserIcon, LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth, useLogout } from "@/hooks/useAuth";
@@ -139,7 +139,7 @@ export function TopNavbar({ onSearch }: TopNavbarProps) {
                           {user.first_name || 'My Account'}
                         </p>
                         <Badge variant="outline" className={`text-xs capitalize ${isSeller ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50' : 'text-slate-500 dark:text-slate-400'}`}>
-                          {user.role}
+                          {user.role === 'admin' ? 'Verified' : user.role}
                         </Badge>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -160,14 +160,6 @@ export function TopNavbar({ onSearch }: TopNavbarProps) {
                       <span>Profile & Appearance</span>
                     </Link>
                   </DropdownMenuItem>
-                  {user.role === 'admin' && (
-                    <DropdownMenuItem asChild className="cursor-pointer py-2 text-violet-600 dark:text-violet-400 focus:text-violet-700 dark:focus:text-violet-300 focus:bg-violet-50 dark:focus:bg-violet-950/50">
-                      <Link to="/secret-admin-portal">
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Admin Portal (2FA)</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                   {isSeller && (
                     <DropdownMenuItem asChild className="cursor-pointer py-2 focus:bg-slate-100 dark:focus:bg-slate-800">
                       <Link to="/dashboard/listings">

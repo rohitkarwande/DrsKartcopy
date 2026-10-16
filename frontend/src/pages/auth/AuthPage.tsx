@@ -4,8 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Mail, Phone, ShieldCheck, ArrowRight, ArrowLeft, MapPin, Briefcase } from "lucide-react";
+import { Activity, Mail, Phone, ShieldCheck, ArrowRight, ArrowLeft, MapPin, Briefcase, ChevronDown } from "lucide-react";
 import { api } from "@/lib/api";
+
+const COUNTRY_CODES = [
+  { code: "+91", country: "IN", name: "India (+91)", flag: "🇮🇳" },
+  { code: "+1", country: "US", name: "USA / Canada (+1)", flag: "🇺🇸" },
+  { code: "+44", country: "GB", name: "UK (+44)", flag: "🇬🇧" },
+  { code: "+971", country: "AE", name: "UAE (+971)", flag: "🇦🇪" },
+  { code: "+966", country: "SA", name: "Saudi Arabia (+966)", flag: "🇸🇦" },
+  { code: "+65", country: "SG", name: "Singapore (+65)", flag: "🇸🇬" },
+  { code: "+61", country: "AU", name: "Australia (+61)", flag: "🇦🇺" },
+  { code: "+49", country: "DE", name: "Germany (+49)", flag: "🇩🇪" },
+  { code: "+33", country: "FR", name: "France (+33)", flag: "🇫🇷" },
+  { code: "+81", country: "JP", name: "Japan (+81)", flag: "🇯🇵" },
+  { code: "+880", country: "BD", name: "Bangladesh (+880)", flag: "🇧🇩" },
+  { code: "+92", country: "PK", name: "Pakistan (+92)", flag: "🇵🇰" },
+  { code: "+977", country: "NP", name: "Nepal (+977)", flag: "🇳🇵" },
+  { code: "+94", country: "LK", name: "Sri Lanka (+94)", flag: "🇱🇰" },
+  { code: "+974", country: "QA", name: "Qatar (+974)", flag: "🇶🇦" },
+  { code: "+968", country: "OM", name: "Oman (+968)", flag: "🇴🇲" },
+  { code: "+965", country: "KW", name: "Kuwait (+965)", flag: "🇰🇼" },
+  { code: "+973", country: "BH", name: "Bahrain (+973)", flag: "🇧🇭" },
+  { code: "+60", country: "MY", name: "Malaysia (+60)", flag: "🇲🇾" },
+  { code: "+63", country: "PH", name: "Philippines (+63)", flag: "🇵🇭" },
+  { code: "+27", country: "ZA", name: "South Africa (+27)", flag: "🇿🇦" },
+  { code: "+55", country: "BR", name: "Brazil (+55)", flag: "🇧🇷" },
+  { code: "+82", country: "KR", name: "South Korea (+82)", flag: "🇰🇷" },
+  { code: "+7", country: "RU", name: "Russia (+7)", flag: "🇷🇺" },
+];
 
 export function AuthPage() {
   const navigate = useNavigate();
@@ -14,6 +41,8 @@ export function AuthPage() {
     location.pathname === "/signup" ? "register" : "login"
   );
   const [method, setMethod] = useState<"email" | "phone">("email");
+  const [countryCode, setCountryCode] = useState("+91");
+  const [displayTarget, setDisplayTarget] = useState("");
   
   const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -108,8 +137,16 @@ export function AuthPage() {
       const endpoint = activeTab === "login" ? "/auth/send-otp" : "/auth/register";
       const action = activeTab === "login" ? "login" : "register";
       
+      let finalIdentifier = identifier.trim();
+      if (method === "phone") {
+        if (!finalIdentifier.startsWith("+")) {
+          finalIdentifier = `${countryCode}${finalIdentifier}`;
+        }
+      }
+      setDisplayTarget(finalIdentifier);
+
       const res = await api.post(endpoint, {
-        identifier,
+        identifier: finalIdentifier,
         action,
       });
       setUserId(res.data.userId);
@@ -292,27 +329,49 @@ export function AuthPage() {
                     <Label htmlFor="identifier" className="text-slate-700">
                       {method === "email" ? "Email Address" : "Mobile Number"}
                     </Label>
-                    <div className="relative">
-                      {method === "phone" && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-medium">
-                          +91
+                    {method === "phone" ? (
+                      <div className="flex rounded-xl shadow-sm">
+                        <div className="relative">
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            aria-label="Country Code"
+                            className="h-14 pl-3 pr-8 bg-slate-50 border border-r-0 border-slate-200 rounded-l-xl text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
+                          >
+                            {COUNTRY_CODES.map((item) => (
+                              <option key={item.code} value={item.code} className="text-slate-800 bg-white">
+                                {item.flag} {item.code}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                         </div>
-                      )}
-                      {method === "email" && (
+                        <Input
+                          id="identifier"
+                          type="tel"
+                          placeholder="9876543210"
+                          value={identifier}
+                          onChange={(e) => setIdentifier(e.target.value)}
+                          required
+                          className="h-14 rounded-l-none rounded-r-xl bg-slate-50/50 border-slate-200 focus-visible:ring-emerald-500 text-lg flex-1"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                           <Mail className="h-5 w-5" />
                         </div>
-                      )}
-                      <Input
-                        id="identifier"
-                        type={method === "email" ? "email" : "tel"}
-                        placeholder={method === "email" ? "doctor@hospital.com" : "9876543210"}
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        required
-                        className={`h-14 bg-slate-50/50 border-slate-200 focus-visible:ring-emerald-500 text-lg ${method === 'phone' ? 'pl-11' : 'pl-11'}`}
-                      />
-                    </div>
+                        <Input
+                          id="identifier"
+                          type="email"
+                          placeholder="doctor@hospital.com"
+                          value={identifier}
+                          onChange={(e) => setIdentifier(e.target.value)}
+                          required
+                          className="h-14 bg-slate-50/50 border-slate-200 focus-visible:ring-emerald-500 text-lg pl-11"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -377,7 +436,7 @@ export function AuthPage() {
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Verify OTP</h2>
                 <p className="text-slate-500 mt-2">
-                  Enter the 6-digit code sent to <span className="font-semibold text-slate-900">{identifier}</span>
+                  Enter the 6-digit code sent to <span className="font-semibold text-slate-900">{displayTarget || identifier}</span>
                 </p>
               </div>
 
@@ -530,7 +589,7 @@ export function AuthPage() {
                   <div className="text-sm font-bold text-slate-800 group-hover:text-violet-600 transition-colors">Dr. Rohit Karwande</div>
                   <div className="text-xs text-slate-500 truncate">rohitkarwande82@gmail.com</div>
                 </div>
-                <span className="text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md shrink-0">Admin</span>
+                <span className="text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md shrink-0">Verified</span>
               </button>
 
               <button
@@ -544,7 +603,7 @@ export function AuthPage() {
                   <div className="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Dr's Kart Info</div>
                   <div className="text-xs text-slate-500 truncate">infodrskart@gmail.com</div>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">Admin</span>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">Verified</span>
               </button>
 
               <button

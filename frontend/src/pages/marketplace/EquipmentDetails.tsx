@@ -34,25 +34,6 @@ export function EquipmentDetails() {
   const [reportError, setReportError] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
-  // Admin delete listing states
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleAdminDelete = async () => {
-    if (!id || !equipment) return;
-    if (!confirm(`Are you sure you want to delete (archive) the listing "${equipment?.title || ""}" as an administrator?`)) {
-      return;
-    }
-    setIsDeleting(true);
-    try {
-      await api.delete(`/equipment/${id}`);
-      alert("Listing has been successfully deleted/archived.");
-      navigate("/search");
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to delete listing.");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const handleReportSubmit = async () => {
     if (!id || !equipment?.seller_id) return;
@@ -252,23 +233,7 @@ export function EquipmentDetails() {
               </div>
             )}
 
-            {user?.role === 'admin' && (
-              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-850 space-y-2">
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider text-center">Admin Actions</p>
-                <Button
-                  variant="destructive"
-                  className="w-full h-10 bg-red-600 hover:bg-red-700 text-white font-bold"
-                  onClick={handleAdminDelete}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</>
-                  ) : (
-                    <>Delete Listing</>
-                  )}
-                </Button>
-              </div>
-            )}
+
           </div>
         </div>
 

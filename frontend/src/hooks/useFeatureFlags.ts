@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 export interface FeatureFlag {
@@ -30,17 +30,4 @@ export function useFeatureFlag(key: string, defaultValue = true) {
   }
   const isEnabled = data.flags[key] !== undefined ? data.flags[key] : defaultValue;
   return { isEnabled, isLoading: false };
-}
-
-export function useUpdateFeatureFlag() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ key, is_enabled }: { key: string; is_enabled: boolean }) => {
-      const res = await api.patch(`/admin/feature-flags/${key}`, { is_enabled });
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
-    },
-  });
 }

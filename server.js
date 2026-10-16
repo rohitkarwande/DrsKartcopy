@@ -4,27 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 require('dotenv').config();
-const chatRoutes = require('./routes/chatRoutes');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const equipmentRoutes = require('./routes/equipmentRoutes');
-const inquiryRoutes = require('./routes/inquiryRoutes');
-const sellerRoutes = require('./routes/sellerRoutes');
-const reportRoutes = require('./routes/reportRoutes');
-const engagementRoutes = require('./routes/engagementRoutes');
-const dealRoutes = require('./routes/dealRoutes');
-const adminAuthRoutes = require('./routes/adminAuthRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
-const vendorRoutes = require('./routes/vendorRoutes');
-const serviceRequestRoutes = require('./routes/serviceRequestRoutes');
-const legalRoutes = require('./routes/legalRoutes');
-const healthRoutes = require('./routes/healthRoutes');
-const bannerRoutes = require('./routes/bannerRoutes');
-const featureFlagRoutes = require('./routes/featureFlagRoutes');
-const promotionRoutes = require('./routes/promotionRoutes');
-const ticketRoutes = require('./routes/ticketRoutes');
-const contactRoutes = require('./routes/contactRoutes');
+const AppRoutes = require('./routes/appRoutes');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
@@ -173,28 +153,8 @@ app.use((req, res, next) => {
 // Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes); // Note: Should probably be 'users' to match REST conventions, but keeping existing 'user' for now.
-app.use('/api/equipment', equipmentRoutes);
-app.use('/api/inquiries', inquiryRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/sellers', sellerRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/engagement', engagementRoutes);
-app.use('/api/deals', dealRoutes);
-app.use('/api/admin/auth', adminAuthRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/vendor', vendorRoutes);
-app.use('/api/service-requests', serviceRequestRoutes);
-app.use('/api/legal', legalRoutes);
-app.use('/api/banners', bannerRoutes);
-app.use('/api/feature-flags', featureFlagRoutes);
-app.use('/api/promotions', promotionRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/contact', contactRoutes);
-  app.use('/health', healthRoutes);
+// Centralized Application Routes (AppRoutes Architecture)
+AppRoutes(app);
 
 // React router catch-all route
 app.get(/(.*)/, (req, res) => {

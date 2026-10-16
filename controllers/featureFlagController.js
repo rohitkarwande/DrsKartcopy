@@ -1,4 +1,4 @@
-const featureFlagService = require('../services/admin/featureFlagService');
+const featureFlagService = require('../services/platform/featureFlagService');
 
 // 1. Get all feature flags (public)
 const getFeatureFlags = async (req, res) => {
@@ -22,24 +22,7 @@ const getFeatureFlag = async (req, res) => {
     }
 };
 
-// 3. Update feature flag status (Admin)
-const updateFeatureFlag = async (req, res) => {
-    try {
-        const { key } = req.params;
-        const { is_enabled } = req.body;
-        const flag = await featureFlagService.updateFeatureFlag(key, is_enabled);
-        res.json({
-            message: `Feature flag '${key}' updated successfully`,
-            flag
-        });
-    } catch (error) {
-        console.error('Error updating feature flag:', error);
-        res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update feature flag' });
-    }
-};
-
 module.exports = {
     getFeatureFlags,
-    getFeatureFlag,
-    updateFeatureFlag
+    getFeatureFlag
 };

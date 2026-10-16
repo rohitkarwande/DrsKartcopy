@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import { LayoutDashboard, Package, MessageCircle, ShoppingBag, Loader2, User, Activity, Shield, Sparkles, LifeBuoy, Wrench } from "lucide-react";
+import { LayoutDashboard, Package, MessageCircle, ShoppingBag, Loader2, User, Activity, Sparkles, LifeBuoy, Wrench } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
@@ -93,16 +93,7 @@ export function DashboardLayout() {
                 </Link>
               </div>
 
-              {/* Admin quick link */}
-              {user?.role === 'admin' && (
-                <div className="mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-3 mb-3">Administration</p>
-                  <Link to="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/50 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors">
-                    <Shield className="h-5 w-5 text-violet-500 dark:text-violet-400" />
-                    Admin Panel
-                  </Link>
-                </div>
-              )}
+
             </nav>
           </div>
         </aside>

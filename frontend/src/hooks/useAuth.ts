@@ -49,7 +49,6 @@ export function useLogout() {
   return () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('admin_2fa_verified');
     queryClient.clear();
     navigate('/');
   };

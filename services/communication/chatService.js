@@ -29,13 +29,7 @@ class ChatService {
             [inquiryId]
         );
 
-        // Notify Admins
-        try {
-            const { notifyAdmins } = require('../notifications/adminNotificationService');
-            notifyAdmins(io, 'NEW_CHAT_ROOM', `A new chat room was created for Inquiry #${inquiryId}`, inquiryId);
-        } catch (err) {
-            console.error('Error notifying admins of new chat room:', err.message);
-        }
+
 
         return {
             alreadyExists: false,
@@ -94,7 +88,7 @@ class ChatService {
             if (roomInfo.rows.length > 0) {
                 const { buyer_id, seller_id, equipment_title, sender_name } = roomInfo.rows[0];
                 const recipientId = senderId === buyer_id ? seller_id : buyer_id;
-                const { emailNewMessage } = require('../notifications/emailService');
+                const { emailNewMessage } = require('../notifications/chatNotificationService');
                 emailNewMessage(recipientId, sender_name || "A Dr's Kart user", message, equipment_title);
             }
         } catch (emailErr) {

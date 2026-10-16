@@ -1,5 +1,9 @@
 const db = require('../../config/db');
 
+/**
+ * ServiceRequestService
+ * Handles user equipment servicing and maintenance requests
+ */
 class ServiceRequestService {
     async createRequest(userId, { equipment_type, issue_description, contact_name, contact_phone, city }) {
         if (!issue_description) {
@@ -21,32 +25,6 @@ class ServiceRequestService {
             [userId]
         );
         return result.rows;
-    }
-
-    async getAllRequests() {
-        const result = await db.query("SELECT * FROM service_requests ORDER BY created_at DESC");
-        return result.rows;
-    }
-
-    async updateRequestStatus(id, { status, assigned_to }) {
-        if (!['Pending', 'In Progress', 'Completed', 'Rejected'].includes(status)) {
-            const err = new Error('Invalid status');
-            err.statusCode = 400;
-            throw err;
-        }
-
-        const result = await db.query(
-            "UPDATE service_requests SET status = $1, assigned_to = COALESCE($2, assigned_to), updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *",
-            [status, assigned_to, id]
-        );
-
-        if (result.rows.length === 0) {
-            const err = new Error('Service request not found');
-            err.statusCode = 404;
-            throw err;
-        }
-
-        return result.rows[0];
     }
 }
 

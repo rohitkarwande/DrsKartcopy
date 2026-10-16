@@ -1,17 +1,17 @@
 const db = require('./db');
 
-// Initialize the table if it doesn't exist
+// Initialize the table if it doesn't exist with TIMESTAMPTZ expiry
 db.query(`
   CREATE TABLE IF NOT EXISTS cache_store (
     key VARCHAR(255) PRIMARY KEY,
     value TEXT NOT NULL,
-    expiry BIGINT NOT NULL
+    expiry TIMESTAMPTZ NOT NULL
   )
 `).catch(err => console.error("Failed to create cache_store table:", err));
 
 const redisClient = {
     setEx: async (key, seconds, value) => {
-        const expiry = Date.now() + seconds * 1000;
+        const expiry = new Date(Date.now() + seconds * 1000);
         await db.query(
             `INSERT INTO cache_store (key, value, expiry) 
              VALUES ($1, $2, $3) 
@@ -28,7 +28,7 @@ const redisClient = {
         if (result.rows.length === 0) return null;
         
         const item = result.rows[0];
-        if (Date.now() > Number(item.expiry)) {
+        if (new Date() > new Date(item.expiry)) {
             await db.query(`DELETE FROM cache_store WHERE key = $1`, [key]);
             return null;
         }
@@ -37,7 +37,16 @@ const redisClient = {
     del: async (key) => {
         await db.query(`DELETE FROM cache_store WHERE key = $1`, [key]);
         return 1;
+    },
+    cleanupExpired: async () => {
+        const result = await db.query(`DELETE FROM cache_store WHERE expiry < NOW()`);
+        return result.rowCount;
     }
 };
+
+// Prune expired entries every 10 minutes
+setInterval(() => {
+    redisClient.cleanupExpired().catch(() => {});
+}, 10 * 60 * 1000).unref();
 
 module.exports = redisClient;

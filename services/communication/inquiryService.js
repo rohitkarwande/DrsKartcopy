@@ -1,6 +1,5 @@
 const db = require('../../config/db');
-const { emailNewInquiry, emailDealLocked } = require('../notifications/emailService');
-const { notifyAdmins } = require('../notifications/adminNotificationService');
+const { emailNewInquiry, emailDealLocked } = require('../notifications/inquiryNotificationService');
 
 const VALID_STATUSES = ['Pending', 'In Progress', 'Deal Locked', 'Closed', 'Closed_Lost', 'Contacted', 'Closed_Won', 'Deal Closed'];
 
@@ -173,8 +172,6 @@ class InquiryService {
                 [updatedInquiry.equipment_post_id]
             );
 
-            // Notify Admins
-            notifyAdmins(io, 'DEAL_LOCKED', `A deal has been locked/closed for Equipment #${updatedInquiry.equipment_post_id}`, updatedInquiry.equipment_post_id);
 
             // Email parties
             const equipmentTitleRes = await db.query('SELECT title FROM equipment_posts WHERE id = $1', [updatedInquiry.equipment_post_id]);
@@ -191,84 +188,6 @@ class InquiryService {
         }
 
         return updatedInquiry;
-    }
-
-    /**
-     * Admin: Funnel analytics
-     */
-    async getAdminFunnelStats(period = 30) {
-        const days = parseInt(period, 10) || 30;
-
-        const [funnelRows, timelineRows, topEquipmentRows] = await Promise.all([
-            db.query(`
-                SELECT 
-                    COUNT(*) FILTER (WHERE status = 'Pending')                               AS pending,
-                    COUNT(*) FILTER (WHERE status = 'In Progress')                           AS in_progress,
-                    COUNT(*) FILTER (WHERE status IN ('Deal Locked', 'Closed_Won', 'Deal Closed')) AS deal_locked,
-                    COUNT(*) FILTER (WHERE status = 'Closed')                                AS closed,
-                    COUNT(*) FILTER (WHERE status = 'Closed_Lost')                           AS lost,
-                    COUNT(*)                                                                  AS total,
-                    COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 day' * $1)     AS recent_total
-                FROM inquiries
-            `, [days]),
-
-            db.query(`
-                SELECT 
-                    DATE(created_at)                                                      AS day,
-                    COUNT(*)                                                              AS total_inquiries,
-                    COUNT(*) FILTER (WHERE status IN ('Deal Locked', 'Closed', 'Deal Closed')) AS deals
-                FROM inquiries
-                WHERE created_at >= NOW() - INTERVAL '1 day' * $1
-                GROUP BY DATE(created_at)
-                ORDER BY day ASC
-            `, [days]),
-
-            db.query(`
-                SELECT 
-                    ep.id,
-                    ep.title,
-                    COUNT(i.id)                                                              AS inquiry_count,
-                    COUNT(i.id) FILTER (WHERE i.status IN ('Deal Locked', 'Closed', 'Deal Closed')) AS deal_count
-                FROM equipment_posts ep
-                JOIN inquiries i ON ep.id = i.equipment_post_id
-                GROUP BY ep.id, ep.title
-                ORDER BY inquiry_count DESC
-                LIMIT 5
-            `)
-        ]);
-
-        const f = funnelRows.rows[0];
-        const total = parseInt(f.total, 10) || 0;
-        const dealLocked = parseInt(f.deal_locked, 10) || 0;
-        const closed = parseInt(f.closed, 10) || 0;
-        const conversionRate = total > 0 ? (((dealLocked + closed) / total) * 100).toFixed(1) + '%' : '0%';
-
-        return {
-            funnel: {
-                pending: parseInt(f.pending, 10),
-                in_progress: parseInt(f.in_progress, 10),
-                deal_locked: parseInt(f.deal_locked, 10),
-                closed: parseInt(f.closed, 10),
-                lost: parseInt(f.lost, 10),
-                total,
-                recent_total: parseInt(f.recent_total, 10),
-                conversion_rate: conversionRate,
-            },
-            timeline: timelineRows.rows.map(r => ({
-                day: r.day,
-                total_inquiries: parseInt(r.total_inquiries, 10),
-                deals: parseInt(r.deals, 10),
-            })),
-            top_equipment: topEquipmentRows.rows.map(r => ({
-                id: r.id,
-                title: r.title,
-                inquiry_count: parseInt(r.inquiry_count, 10),
-                deal_count: parseInt(r.deal_count, 10),
-                conversion: r.inquiry_count > 0
-                    ? ((r.deal_count / r.inquiry_count) * 100).toFixed(0) + '%'
-                    : '0%',
-            })),
-        };
     }
 }
 

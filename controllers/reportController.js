@@ -1,4 +1,4 @@
-const reportService = require('../services/admin/reportService');
+const reportService = require('../services/platform/reportService');
 
 const reportFraud = async (req, res) => {
     try {

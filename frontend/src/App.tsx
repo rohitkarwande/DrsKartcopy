@@ -1,40 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { MainLayout } from "./components/layout/MainLayout";
-import { DashboardLayout } from "./components/layout/DashboardLayout";
-import { DashboardOverview } from "./pages/dashboard/Overview";
-import { SellEquipment } from "./pages/dashboard/SellEquipment";
-import { Listings } from "./pages/dashboard/Listings";
-import { Inquiries } from "./pages/dashboard/Inquiries";
-import { Chat } from "./pages/dashboard/Chat";
-import { Profile } from "./pages/dashboard/Profile";
-import { Promotions } from "./pages/dashboard/Promotions";
-import { SupportTickets } from "./pages/dashboard/SupportTickets";
-import { Home } from "./pages/marketplace/Home";
-import { About } from "./pages/marketplace/About";
-import { Search } from "./pages/marketplace/Search";
-import { EquipmentDetails } from "./pages/marketplace/EquipmentDetails";
-import { AuthPage } from "./pages/auth/AuthPage";
-import { KycVerification } from "./pages/auth/KycVerification";
-import { SellerProtectedRoute } from "./components/auth/SellerProtectedRoute";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { AdminProtectedRoute } from "./components/auth/AdminProtectedRoute";
-import { AdminSecretPortal } from "./pages/admin/AdminSecretPortal";
-import { AdminLayout } from "./pages/admin/AdminLayout";
-import { AdminOverview } from "./pages/admin/AdminOverview";
-import { KycApplications } from "./pages/admin/KycApplications";
-import { DealFunnel } from "./pages/admin/DealFunnel";
-import { AdminUsers } from "./pages/admin/AdminUsers";
-import { AdminSecurity } from "./pages/admin/AdminSecurity";
-import { HeroBanners } from "./pages/admin/HeroBanners";
-import { AdminPromotions } from "./pages/admin/AdminPromotions";
-import { AdminTickets } from "./pages/admin/AdminTickets";
-import { AdminReports } from "./pages/admin/AdminReports";
-import { AdminServices } from "./pages/admin/AdminServices";
-import { ServiceBooking } from "./pages/dashboard/ServiceBooking";
-import { Contact } from "./pages/marketplace/Contact";
+import { useEffect, useState } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useRoleSync } from "./hooks/useAuth";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { ThemeProvider } from "./context/ThemeContext";
+import { useRoleSync } from "./hooks/useAuth";
+import { AppRoutes } from "./routes/AppRoutes";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,98 +15,38 @@ const queryClient = new QueryClient({
   },
 });
 
-// Mounts the real-time role sync socket listener globally
-// Shows a toast notification when admin approves/rejects
+/**
+ * Mounts the real-time role sync socket listener globally.
+ * Triggers a custom event when the admin updates or reviews KYC/role status.
+ */
 function RoleSyncMount() {
   useRoleSync((data) => {
     if (data.role === "seller") {
-      // Show a prominent browser notification or use a simple alert-style DOM message
-      // We'll use the browser's built-in notification if available, fallback to alert
       const msg = data.message || "🎉 Your Seller account has been approved!";
-      // Create a visible in-page toast by dispatching a custom event
-      window.dispatchEvent(new CustomEvent("role-update-toast", { detail: { message: msg, type: "success" } }));
+      window.dispatchEvent(
+        new CustomEvent("role-update-toast", {
+          detail: { message: msg, type: "success" },
+        })
+      );
     } else if (data.kycStatus === "Rejected") {
-      window.dispatchEvent(new CustomEvent("role-update-toast", { detail: { message: data.message, type: "error" } }));
+      window.dispatchEvent(
+        new CustomEvent("role-update-toast", {
+          detail: { message: data.message, type: "error" },
+        })
+      );
     }
   });
   return null;
 }
 
-function App() {
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="drskart-theme">
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <RoleSyncMount />
-          <ToastListener />
-          <Routes>
-          {/* ── SECRET ADMIN 2FA GATEWAY PORTAL (Special Link) ── */}
-          <Route path="/secret-admin-portal" element={<AdminSecretPortal />} />
-
-          {/* ── ADMIN ROUTES (separate from main layout) ── */}
-          <Route element={<AdminProtectedRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminOverview />} />
-              <Route path="banners" element={<HeroBanners />} />
-              <Route path="promotions" element={<AdminPromotions />} />
-              <Route path="kyc" element={<KycApplications />} />
-              <Route path="deals" element={<DealFunnel />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="security" element={<AdminSecurity />} />
-              <Route path="tickets" element={<AdminTickets />} />
-              <Route path="reports" element={<AdminReports />} />
-              <Route path="services" element={<AdminServices />} />
-            </Route>
-          </Route>
-
-          {/* All routes wrapped in MainLayout (gives TopNavbar + Footer) */}
-          <Route element={<MainLayout />}>
-            {/* ── PUBLIC MARKETPLACE ROUTES ── */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/equipment/:id" element={<EquipmentDetails />} />
-            <Route path="/contact" element={<Contact />} />
-
-            {/* ── AUTH ROUTES ── */}
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/signup" element={<AuthPage />} />
-            <Route path="/kyc" element={<KycVerification />} />
-
-            {/* ── DASHBOARD ROUTES (with sidebar) ── */}
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index element={<DashboardOverview />} />
-              <Route path="listings" element={<Listings />} />
-              <Route path="inquiries" element={<Inquiries />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="promotions" element={<Promotions />} />
-              <Route path="tickets" element={<SupportTickets />} />
-              <Route path="services" element={<ServiceBooking />} />
-            </Route>
-
-            {/* ── SELLER-ONLY ROUTE (gated by KYC/role) ── */}
-            <Route element={<SellerProtectedRoute />}>
-              <Route path="/sell" element={<SellEquipment />} />
-              <Route path="/edit/:id" element={<SellEquipment />} />
-            </Route>
-          </Route>
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
-  </ThemeProvider>
-  );
-}
-
-// ── Simple in-page toast for role updates ─────────────────────────────────────
-import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
-
+/**
+ * Global in-page toast notification listener for account and role status updates
+ */
 function ToastListener() {
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -165,6 +75,24 @@ function ToastListener() {
       )}
       <p className="text-sm font-medium leading-snug">{toast.message}</p>
     </div>
+  );
+}
+
+/**
+ * Root Application Component
+ * Initializes context providers and renders the centralized AppRoutes tree
+ */
+function App() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="drskart-theme">
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <RoleSyncMount />
+          <ToastListener />
+          <AppRoutes />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

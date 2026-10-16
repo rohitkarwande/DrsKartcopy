@@ -1,4 +1,4 @@
-const auditService = require('../services/admin/auditService');
+const auditService = require('../services/platform/auditService');
 
 const auditLog = (action, entityType) => {
     return async (req, res, next) => {
@@ -28,4 +28,3 @@ const auditLog = (action, entityType) => {
 };
 
 module.exports = auditLog;
-

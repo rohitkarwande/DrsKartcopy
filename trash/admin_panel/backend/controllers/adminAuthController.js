@@ -1,4 +1,4 @@
-const authService = require('../services/auth/authService');
+const { adminAuthService } = require('../services/adminAuthService');
 
 /**
  * Request Dual OTP (Email + Mobile) for Admin Verification
@@ -11,7 +11,7 @@ const requestDualOtp = async (req, res) => {
     }
 
     try {
-        const result = await authService.requestAdminDualOtp(identifier);
+        const result = await adminAuthService.requestAdminDualOtp(identifier);
         res.json(result);
     } catch (error) {
         console.error('Admin request dual OTP error:', error);
@@ -36,7 +36,7 @@ const verifyDualOtp = async (req, res) => {
     const userAgent = req.headers['user-agent'] || 'Unknown';
 
     try {
-        const result = await authService.verifyAdminDualOtp({
+        const result = await adminAuthService.verifyAdminDualOtp({
             rawUserId,
             emailOtp,
             mobileOtp,

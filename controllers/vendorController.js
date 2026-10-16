@@ -1,4 +1,5 @@
 const vendorService = require('../services/equipment/vendorService');
+const equipmentService = require('../services/equipment/equipmentService');
 
 // 1. Vendor Dashboard Metrics
 const getDashboardMetrics = async (req, res) => {
@@ -16,9 +17,9 @@ const updateInventory = async (req, res) => {
     try {
         const { id } = req.params;
         const { stock_quantity, reserved_quantity } = req.body;
-        const post = await vendorService.updateInventory({
+        const post = await equipmentService.updateInventory({
             id,
-            vendorId: req.user.id,
+            sellerId: req.user.id,
             stock_quantity,
             reserved_quantity
         });
@@ -85,8 +86,8 @@ const bulkUploadListings = async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'CSV file required' });
 
-        const result = await vendorService.bulkUploadListings({
-            vendorId: req.user.id,
+        const result = await equipmentService.bulkUploadEquipment({
+            sellerId: req.user.id,
             filePath: req.file.path
         });
         res.json(result);

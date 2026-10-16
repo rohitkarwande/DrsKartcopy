@@ -40,8 +40,7 @@ api.interceptors.response.use(
       // Redirect to login if not already on auth or secret portal pages
       if (
         window.location.pathname !== '/login' &&
-        window.location.pathname !== '/signup' &&
-        !window.location.pathname.includes('secret-admin-portal')
+        window.location.pathname !== '/signup'
       ) {
         window.location.href = '/login';
       }

@@ -44,27 +44,3 @@ export function useCreateServiceRequest() {
     },
   });
 }
-
-export function useAllServiceRequestsAdmin() {
-  return useQuery({
-    queryKey: ['admin', 'services'],
-    queryFn: async () => {
-      const res = await api.get('/service-requests/admin/all');
-      return res.data as ServiceRequest[];
-    },
-    staleTime: 1000 * 30,
-  });
-}
-
-export function useUpdateServiceRequestStatus() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, status, assigned_to }: { id: number; status: string; assigned_to?: number | null }) => {
-      const res = await api.patch(`/service-requests/admin/${id}/status`, { status, assigned_to });
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'services'] });
-    },
-  });
-}

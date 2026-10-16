@@ -50,41 +50,8 @@ const getMyPromotions = async (req, res) => {
     }
 };
 
-// ─── ADMIN ─────────────────────────────────────────────────────────────────────
-
-// GET /api/promotions/admin — admin lists all promotions
-const adminListPromotions = async (req, res) => {
-    try {
-        const promotions = await promotionService.adminListPromotions(req.query.status);
-        res.json({ promotions });
-    } catch (err) {
-        console.error('adminListPromotions error:', err.message);
-        sendError(res, err.message || 'Failed to fetch promotions', err.statusCode || 500);
-    }
-};
-
-// PATCH /api/promotions/:id/status — admin approves or rejects
-const adminUpdatePromotionStatus = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status, admin_note } = req.body;
-
-        await promotionService.adminUpdatePromotionStatus(id, {
-            status,
-            admin_note
-        });
-
-        res.json({ message: `Promotion ${status === 'Active' ? 'activated' : 'rejected'} successfully.` });
-    } catch (err) {
-        console.error('adminUpdatePromotionStatus error:', err.message);
-        sendError(res, err.message || 'Failed to update promotion status', err.statusCode || 500);
-    }
-};
-
 module.exports = {
     getPlans,
     requestPromotion,
-    getMyPromotions,
-    adminListPromotions,
-    adminUpdatePromotionStatus,
+    getMyPromotions
 };

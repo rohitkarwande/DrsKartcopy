@@ -1,8 +1,11 @@
-const userService = require('../services/auth/userService');
+const { userProfileService } = require('../services/auth/userProfileService');
+const { userKycService } = require('../services/auth/userKycService');
+const { userDashboardService } = require('../services/auth/userDashboardService');
+const { userContactService } = require('../services/auth/userContactService');
 
 const getProfile = async (req, res) => {
     try {
-        const profile = await userService.getProfile(req.user.id);
+        const profile = await userProfileService.getProfile(req.user.id);
         res.json(profile);
     } catch (error) {
         console.error('Error in getProfile:', error);
@@ -12,7 +15,7 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const updatedProfile = await userService.updateProfile(req.user.id, req.body);
+        const updatedProfile = await userProfileService.updateProfile(req.user.id, req.body);
         res.json({ message: 'Profile updated', profile: updatedProfile });
     } catch (error) {
         console.error('Error in updateProfile:', error);
@@ -22,7 +25,7 @@ const updateProfile = async (req, res) => {
 
 const submitKyc = async (req, res) => {
     try {
-        const kyc = await userService.submitKyc({
+        const kyc = await userKycService.submitKyc({
             userId: req.user.id,
             data: req.body,
             file: req.file,
@@ -38,7 +41,7 @@ const submitKyc = async (req, res) => {
 
 const getKycStatus = async (req, res) => {
     try {
-        const status = await userService.getKycStatus(req.user.id);
+        const status = await userKycService.getKycStatus(req.user.id);
         res.json(status);
     } catch (error) {
         console.error('Error in getKycStatus:', error);
@@ -55,7 +58,7 @@ const becomeSeller = async (req, res) => {
 
 const getDashboard = async (req, res) => {
     try {
-        const dashboard = await userService.getDashboard(req.user.id);
+        const dashboard = await userDashboardService.getDashboard(req.user.id);
         res.json(dashboard);
     } catch (error) {
         console.error('Error in getDashboard:', error);
@@ -66,7 +69,7 @@ const getDashboard = async (req, res) => {
 const addContact = async (req, res) => {
     try {
         const { identifier, type } = req.body;
-        const result = await userService.addContact({
+        const result = await userContactService.addContact({
             userId: req.user.id,
             identifier,
             type
@@ -81,7 +84,7 @@ const addContact = async (req, res) => {
 const verifyContact = async (req, res) => {
     try {
         const { identifier, type, otp } = req.body;
-        const result = await userService.verifyContact({
+        const result = await userContactService.verifyContact({
             userId: req.user.id,
             identifier,
             type,

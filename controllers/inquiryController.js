@@ -56,21 +56,10 @@ const getInquiryById = async (req, res) => {
     }
 };
 
-const getAdminFunnelStats = async (req, res) => {
-    try {
-        const stats = await inquiryService.getAdminFunnelStats(req.query.period);
-        res.json(stats);
-    } catch (error) {
-        console.error('Error fetching admin funnel stats:', error);
-        res.status(error.statusCode || 500).json({ error: error.message || 'Server error fetching funnel stats' });
-    }
-};
-
 module.exports = {
     createInquiry,
     getSellerInquiries,
     updateInquiryStatus,
     getBuyerInquiries,
-    getInquiryById,
-    getAdminFunnelStats,
+    getInquiryById
 };

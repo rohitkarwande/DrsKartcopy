@@ -11,7 +11,7 @@ const submitLegalQuery = async (req, res) => {
     }
 };
 
-// User Tracking (Get my queries)
+// 2. User Tracking (Get my queries)
 const getMyLegalQueries = async (req, res) => {
     try {
         const queries = await legalService.getMyQueries(req.user.id);
@@ -22,32 +22,7 @@ const getMyLegalQueries = async (req, res) => {
     }
 };
 
-// 2. Admin Panel
-const getAllLegalQueries = async (req, res) => {
-    try {
-        const queries = await legalService.getAllQueries();
-        res.json(queries);
-    } catch (error) {
-        console.error('Error fetching all legal queries:', error);
-        res.status(error.statusCode || 500).json({ error: error.message || 'Server Error fetching all legal queries' });
-    }
-};
-
-const updateLegalQueryStatus = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-        const query = await legalService.updateQueryStatus(id, status);
-        res.json({ message: 'Legal query updated', query });
-    } catch (error) {
-        console.error('Error updating legal query:', error);
-        res.status(error.statusCode || 500).json({ error: error.message || 'Server Error updating legal query' });
-    }
-};
-
 module.exports = {
     submitLegalQuery,
-    getMyLegalQueries,
-    getAllLegalQueries,
-    updateLegalQueryStatus
+    getMyLegalQueries
 };
