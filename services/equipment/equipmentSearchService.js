@@ -18,7 +18,11 @@ class EquipmentSearchService {
         let paramIndex = 1;
 
         if (category) { queryStr += ` AND ep.category = $${paramIndex++}`; queryParams.push(category); }
-        if (condition) { queryStr += ` AND ep.condition = $${paramIndex++}`; queryParams.push(condition); }
+        if (condition) {
+            const condVal = condition === 'Spare Parts' ? 'Spare' : condition;
+            queryStr += ` AND ep.condition = $${paramIndex++}`;
+            queryParams.push(condVal);
+        }
         if (city) { queryStr += ` AND ep.city ILIKE $${paramIndex++}`; queryParams.push(`%${city}%`); }
         if (brand) { queryStr += ` AND ep.brand ILIKE $${paramIndex++}`; queryParams.push(`%${brand}%`); }
         if (minPrice) { queryStr += ` AND ep.price >= $${paramIndex++}`; queryParams.push(minPrice); }

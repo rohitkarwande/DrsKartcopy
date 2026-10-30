@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { 
   Loader2, PlusCircle, Trash2, CheckCircle2, 
-  MapPin, Calendar, Eye, Upload, Download, X, Edit, Sparkles, MousePointerClick, Megaphone
+  MapPin, Calendar, Eye, Upload, Download, X, Edit, Sparkles, MousePointerClick, Megaphone, ShoppingBag
 } from "lucide-react";
 import { useState } from "react";
 import { api, API_BASE_URL } from "@/lib/api";
@@ -90,7 +90,13 @@ export function Listings() {
             Manage your inventory · {listings?.length ?? 0} total listing{listings?.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button asChild variant="outline" className="shrink-0 border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50">
+            <Link to="/search">
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Browse Marketplace
+            </Link>
+          </Button>
           <Button onClick={() => setShowBulkUpload(true)} variant="outline" className="shrink-0 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
             <Upload className="mr-2 h-4 w-4" />
             Bulk Upload
@@ -118,7 +124,7 @@ export function Listings() {
               <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-400">
                 <li>Required columns: Title, Category, Brand, Model, Condition, City</li>
                 <li>Valid Categories: MRI, X-Ray, Cathlab, ECG, Ultrasound, etc.</li>
-                <li>Valid Conditions: Used, Refurbished, Spare</li>
+                <li>Valid Conditions: New, Used, Refurbished, Spare</li>
                 <li>Listings will be saved as <strong>Drafts</strong> until images are added.</li>
               </ul>
               <Button 

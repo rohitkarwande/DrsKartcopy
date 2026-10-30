@@ -8,6 +8,7 @@ export interface UserProfile {
   id: number;
   phone: string;
   email: string | null;
+  username?: string;
   role: 'user' | 'buyer' | 'seller' | 'admin';
   created_at: string;
   first_name?: string;

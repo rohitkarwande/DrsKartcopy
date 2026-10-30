@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2, Mail, Phone, CheckCircle2, ShieldAlert, ShieldCheck, AlertCircle, Sun, Moon, Laptop, Sparkles } from "lucide-react";
+import { 
+  Loader2, Mail, Phone, CheckCircle2, ShieldAlert, ShieldCheck, 
+  AlertCircle, Sun, Moon, Laptop, Sparkles, ShoppingBag, User as UserIcon 
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -79,15 +83,58 @@ export function Profile() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
     setSuccess("");
+
+    const firstName = profile.first_name?.trim();
+    const lastName = profile.last_name?.trim();
+    const ageNum = profile.age ? parseInt(profile.age, 10) : NaN;
+    const profession = profile.profession?.trim();
+    const location = profile.location?.trim();
+    const companyName = profile.company_name?.trim();
+    const bio = profile.bio?.trim();
+
+    if (!firstName) {
+      setError("First Name is compulsory. Please enter your first name.");
+      return;
+    }
+    if (!lastName) {
+      setError("Last Name / Surname is compulsory. Please enter your last name.");
+      return;
+    }
+    if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
+      setError("Age is compulsory and must be a valid age between 18 and 120.");
+      return;
+    }
+    if (!profession) {
+      setError("Profession / Role is compulsory. Please select your profession.");
+      return;
+    }
+    if (!location) {
+      setError("Location / City is compulsory. Please enter your location.");
+      return;
+    }
+    if (!companyName) {
+      setError("Hospital / Company Name is compulsory. Please enter your hospital or company name.");
+      return;
+    }
+    if (!bio) {
+      setError("Short Bio is compulsory. Please provide a brief bio.");
+      return;
+    }
+
+    setSaving(true);
     try {
       await api.put("/user/profile", {
-        ...profile,
-        age: profile.age ? parseInt(profile.age, 10) : null,
+        first_name: firstName,
+        last_name: lastName,
+        age: ageNum,
+        profession,
+        location,
+        company_name: companyName,
+        bio,
       });
-      setSuccess("Profile updated successfully!");
+      setSuccess("Personal details updated successfully!");
       setIsEditing(false);
       await fetchProfile();
     } catch (err: any) {
@@ -101,8 +148,15 @@ export function Profile() {
     setContactLoading(true);
     setContactError("");
     const type = contactMode;
-    const identifier = contactInput.trim();
-    if (!identifier) { setContactError("Please enter a value"); setContactLoading(false); return; }
+    let identifier = contactInput.trim();
+    if (!identifier) { 
+      setContactError("Please enter a value"); 
+      setContactLoading(false); 
+      return; 
+    }
+    if (type === "phone" && !identifier.startsWith("+")) {
+      identifier = `+91${identifier.replace(/^0+/, "")}`;
+    }
     try {
       await api.post("/user/add-contact", { identifier, type });
       setContactStep("otp");
@@ -117,9 +171,13 @@ export function Profile() {
   const handleVerifyContactOtp = async () => {
     setContactLoading(true);
     setContactError("");
+    let identifier = contactInput.trim();
+    if (contactMode === "phone" && !identifier.startsWith("+")) {
+      identifier = `+91${identifier.replace(/^0+/, "")}`;
+    }
     try {
       await api.post("/user/verify-contact", {
-        identifier: contactInput.trim(),
+        identifier,
         type: contactMode,
         otp: contactOtp,
       });
@@ -161,9 +219,17 @@ export function Profile() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Your Profile</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-2">Manage your personal information, security, and appearance preferences.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Your Profile</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Manage your personal information, security, and appearance preferences.</p>
+        </div>
+        <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 shrink-0">
+          <Link to="/search">
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            Browse Marketplace
+          </Link>
+        </Button>
       </div>
 
       {/* ── Appearance & Color Mode Settings ── */}
@@ -337,6 +403,24 @@ export function Profile() {
             </div>
           )}
 
+          {/* Username Row */}
+          <div className="flex items-center justify-between gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/30 dark:bg-slate-800/20">
+            <div className="flex items-center gap-3">
+              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-slate-600 dark:text-slate-400">
+                <UserIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Username</p>
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  @{user?.username || "user"}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+              System Assigned
+            </span>
+          </div>
+
           {/* Email Row */}
           <div className="flex items-center justify-between gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/30 dark:bg-slate-800/20">
             <div className="flex items-center gap-3">
@@ -455,20 +539,19 @@ export function Profile() {
         <CardHeader className="bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-xl text-slate-900 dark:text-white">Personal Details <span className="text-slate-400 text-sm font-normal ml-2">(Optional)</span></CardTitle>
-              <CardDescription className="text-slate-500 dark:text-slate-400">Providing these details builds trust with buyers and sellers on the platform.</CardDescription>
+              <CardTitle className="text-xl text-slate-900 dark:text-white">Personal Details</CardTitle>
+              <CardDescription className="text-slate-500 dark:text-slate-400">All fields are compulsory when updating your personal details.</CardDescription>
             </div>
-            <Button 
-              type="button" 
-              variant={isEditing ? "ghost" : "outline"} 
-              size="sm" 
-              onClick={() => {
-                setIsEditing(!isEditing);
-                if (isEditing) fetchProfile();
-              }}
-            >
-              {isEditing ? "Cancel" : "Edit Details"}
-            </Button>
+            {!isEditing && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Details
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-6">
@@ -479,9 +562,10 @@ export function Profile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="dark:text-slate-200">First Name</Label>
+                <Label className="dark:text-slate-200">First Name <span className="text-red-500">*</span></Label>
                 <Input 
                   disabled={!isEditing}
+                  required={isEditing}
                   value={isEditing ? profile.first_name : (profile.first_name || "Not provided")} 
                   onChange={(e) => setProfile({ ...profile, first_name: e.target.value })} 
                   placeholder="e.g. John" 
@@ -489,9 +573,10 @@ export function Profile() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="dark:text-slate-200">Last Name / Surname</Label>
+                <Label className="dark:text-slate-200">Last Name / Surname <span className="text-red-500">*</span></Label>
                 <Input 
                   disabled={!isEditing}
+                  required={isEditing}
                   value={isEditing ? profile.last_name : (profile.last_name || "Not provided")} 
                   onChange={(e) => setProfile({ ...profile, last_name: e.target.value })} 
                   placeholder="e.g. Doe" 
@@ -500,12 +585,13 @@ export function Profile() {
               </div>
               
               <div className="space-y-2">
-                <Label className="dark:text-slate-200">Age</Label>
+                <Label className="dark:text-slate-200">Age <span className="text-red-500">*</span></Label>
                 <Input 
                   type="number"
                   min="18"
-                  max="100"
+                  max="120"
                   disabled={!isEditing}
+                  required={isEditing}
                   value={isEditing ? profile.age : (profile.age || "Not provided")} 
                   onChange={(e) => setProfile({ ...profile, age: e.target.value })} 
                   placeholder="e.g. 35" 
@@ -513,9 +599,10 @@ export function Profile() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="dark:text-slate-200">Profession / Role</Label>
+                <Label className="dark:text-slate-200">Profession / Role <span className="text-red-500">*</span></Label>
                 <select 
                   disabled={!isEditing}
+                  required={isEditing}
                   className={`flex h-10 w-full items-center justify-between rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${!isEditing ? "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 dark:border-slate-700" : "bg-background dark:bg-slate-800 dark:border-slate-700 dark:text-white"}`}
                   value={isEditing ? profile.profession : (profile.profession || "")}
                   onChange={(e) => setProfile({ ...profile, profession: e.target.value })}
@@ -530,9 +617,10 @@ export function Profile() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label className="dark:text-slate-200">Location / City</Label>
+                <Label className="dark:text-slate-200">Location / City <span className="text-red-500">*</span></Label>
                 <Input 
                   disabled={!isEditing}
+                  required={isEditing}
                   value={isEditing ? profile.location : (profile.location || "Not provided")} 
                   onChange={(e) => setProfile({ ...profile, location: e.target.value })} 
                   placeholder="e.g. Mumbai, Delhi" 
@@ -541,9 +629,10 @@ export function Profile() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label className="dark:text-slate-200">Hospital / Company Name</Label>
+                <Label className="dark:text-slate-200">Hospital / Company Name <span className="text-red-500">*</span></Label>
                 <Input 
                   disabled={!isEditing}
+                  required={isEditing}
                   value={isEditing ? profile.company_name : (profile.company_name || "Not provided")} 
                   onChange={(e) => setProfile({ ...profile, company_name: e.target.value })} 
                   placeholder="e.g. City Care Hospital" 
@@ -552,9 +641,10 @@ export function Profile() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <Label className="dark:text-slate-200">Short Bio</Label>
+                <Label className="dark:text-slate-200">Short Bio <span className="text-red-500">*</span></Label>
                 <Textarea 
                   disabled={!isEditing}
+                  required={isEditing}
                   rows={4}
                   value={isEditing ? profile.bio : (profile.bio || "No bio available.")} 
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })} 

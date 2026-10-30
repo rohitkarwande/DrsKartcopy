@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useChatRooms, useChatMessages, useSendMessage } from "@/hooks/useChat";
 import { useUpdateInquiryStatus } from "@/hooks/useInquiries";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Send, MessageSquare } from "lucide-react";
+import { Loader2, Send, MessageSquare, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -107,8 +107,14 @@ export function Chat() {
     <div className="h-[calc(100vh-8rem)] flex border dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-800 shadow-sm">
       {/* Rooms Sidebar - full width on mobile when no room selected, 1/3 on desktop */}
       <div className={`${activeRoomId ? 'hidden md:flex' : 'flex'} md:flex w-full md:w-1/3 border-r dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex-col`}>
-        <div className="p-4 border-b dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div className="p-3.5 border-b dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between gap-2">
           <h2 className="font-semibold text-lg text-slate-900 dark:text-white">Messages</h2>
+          <Button asChild size="sm" variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-xs shrink-0">
+            <Link to="/search">
+              <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
+              Marketplace
+            </Link>
+          </Button>
         </div>
         <ScrollArea className="flex-1">
           {isLoadingRooms ? (

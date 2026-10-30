@@ -100,10 +100,39 @@ const sanitizeIdentifier = (rawIdentifier) => {
     return { identifier, type };
 };
 
+// Generates a unique default username and ensures it does not conflict
+const generateUniqueUsername = async (dbClient, { email, phone, name } = {}) => {
+    let base = 'user';
+    if (name) {
+        base = name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 15);
+    } else if (email) {
+        base = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 15);
+    } else if (phone) {
+        const digits = phone.replace(/[^0-9]/g, '');
+        base = `user_${digits.slice(-4) || 'med'}`;
+    }
+    if (!base || base.length < 2) base = 'user';
+
+    let username = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+    let isUnique = false;
+    let attempts = 0;
+    const client = dbClient || db;
+    while (!isUnique && attempts < 15) {
+        const check = await client.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (check.rows.length === 0) {
+            isUnique = true;
+        } else {
+            username = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+            attempts++;
+        }
+    }
+    return username;
+};
+
 // Fetches user from DB by ID for auth checks
 const getUserById = async (userId) => {
     const result = await db.query(
-        'SELECT id, email, phone, role, is_verified, status FROM users WHERE id = $1',
+        'SELECT id, email, phone, username, role, is_verified, status FROM users WHERE id = $1',
         [userId]
     );
     return result.rows[0] || null;
@@ -112,8 +141,8 @@ const getUserById = async (userId) => {
 // Fetches full user record with joined user_profiles
 const getUserWithProfile = async (userId) => {
     const result = await db.query(
-        `SELECT u.id, u.email, u.phone, u.role, u.is_verified, u.status,
-                p.first_name, p.last_name, p.profession, p.location
+        `SELECT u.id, u.email, u.phone, u.username, u.role, u.is_verified, u.status,
+                p.first_name, p.last_name, p.company_name, p.profession, p.location, p.avatar_url, p.bio, p.age
          FROM users u 
          LEFT JOIN user_profiles p ON u.id = p.user_id 
          WHERE u.id = $1`,
@@ -130,5 +159,6 @@ module.exports = {
     sanitizePhone,
     sanitizeIdentifier,
     getUserById,
-    getUserWithProfile
+    getUserWithProfile,
+    generateUniqueUsername
 };

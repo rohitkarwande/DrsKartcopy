@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const db = require('../../config/db');
 const cache = require('../../config/cache');
-const { getUserWithProfile } = require('./authUtils');
+const { getUserWithProfile, generateUniqueUsername } = require('./authUtils');
 const { tokenService } = require('./tokenService');
 const { authSecurityService } = require('./authSecurityService');
 
@@ -88,8 +88,15 @@ class OtpService {
         ).catch(err => console.error('Failed to record OTP verification to audit_logs:', err.message));
 
         // 5. Check if user was already verified before we update
-        const previousState = await db.query('SELECT is_verified FROM users WHERE id = $1', [userId]);
+        const previousState = await db.query('SELECT is_verified, username FROM users WHERE id = $1', [userId]);
         const wasVerified = previousState.rows[0]?.is_verified;
+        let currentUsername = previousState.rows[0]?.username;
+
+        if (!currentUsername) {
+            currentUsername = await generateUniqueUsername(db, { id: userId });
+            await db.query('UPDATE users SET username = $1 WHERE id = $2', [currentUsername, userId]);
+            await db.query('UPDATE user_profiles SET username = $1 WHERE user_id = $2', [currentUsername, userId]);
+        }
 
         // 6. Mark user as verified
         await db.query('UPDATE users SET is_verified = TRUE WHERE id = $1', [userId]);
@@ -128,6 +135,7 @@ class OtpService {
                 id: user.id,
                 email: user.email,
                 phone: user.phone,
+                username: user.username || currentUsername,
                 role: user.role,
                 profession: user.profession,
                 location: user.location,

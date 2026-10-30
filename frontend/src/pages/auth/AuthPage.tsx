@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Mail, Phone, ShieldCheck, ArrowRight, ArrowLeft, MapPin, Briefcase, ChevronDown } from "lucide-react";
+import { Activity, Mail, Phone, ShieldCheck, ArrowRight, ArrowLeft, MapPin, Briefcase, ChevronDown, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 
 const COUNTRY_CODES = [
@@ -54,6 +54,7 @@ export function AuthPage() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState("");
   const [customGoogleName, setCustomGoogleName] = useState("");
@@ -153,12 +154,17 @@ export function AuthPage() {
       setStep("otp");
     } catch (err: any) {
       const msg = err.response?.data?.error || "Failed to send OTP";
-      setError(msg);
-      // Auto switch tabs if user already exists or doesn't exist
-      if (msg.includes("already registered") && activeTab === "register") {
+      if (msg.toLowerCase().includes("already registered")) {
+        setError("");
+        setSuccessMessage("User already registered");
         setActiveTab("login");
-      } else if (msg.includes("not registered") && activeTab === "login") {
+      } else if (msg.toLowerCase().includes("not registered")) {
+        setSuccessMessage("");
+        setError(msg);
         setActiveTab("register");
+      } else {
+        setSuccessMessage("");
+        setError(msg);
       }
     } finally {
       setLoading(false);
@@ -299,7 +305,22 @@ export function AuthPage() {
                 </div>
               )}
 
-              <Tabs value={activeTab} onValueChange={(val: any) => { setActiveTab(val); setError(""); }} className="w-full mb-8">
+              {successMessage && (
+                <div className="mb-6 p-4 text-sm font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2.5 shadow-sm">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
+              <Tabs 
+                value={activeTab} 
+                onValueChange={(val: any) => { 
+                  setActiveTab(val); 
+                  setError(""); 
+                  if (val === "register") setSuccessMessage(""); 
+                }} 
+                className="w-full mb-8"
+              >
                 <TabsList className="grid w-full grid-cols-2 p-1 bg-slate-100/80 rounded-xl h-14">
                   <TabsTrigger value="login" className="rounded-lg text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">Login</TabsTrigger>
                   <TabsTrigger value="register" className="rounded-lg text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm">Register</TabsTrigger>
@@ -427,7 +448,16 @@ export function AuthPage() {
           ) : step === "otp" ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
               <button 
-                onClick={() => setStep("input")}
+                type="button"
+                onClick={() => {
+                  setStep("input");
+                  setOtp(["", "", "", "", "", ""]);
+                  setError("");
+                  if (activeTab === "register") {
+                    setActiveTab("login");
+                    setSuccessMessage("User already registered");
+                  }
+                }}
                 className="mb-6 flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" /> Back
@@ -555,7 +585,7 @@ export function AuthPage() {
 
           <div className="mt-8 text-center text-sm text-slate-500">
             By continuing, you agree to Dr's Kart's <br/>
-            <a href="#" className="underline hover:text-slate-900">Terms of Service</a> and <a href="#" className="underline hover:text-slate-900">Privacy Policy</a>
+            <Link to="/terms-of-service" className="underline hover:text-slate-900 transition-colors">Terms of Service</Link> and <Link to="/privacy-policy" className="underline hover:text-slate-900 transition-colors">Privacy Policy</Link>
           </div>
         </div>
       </div>

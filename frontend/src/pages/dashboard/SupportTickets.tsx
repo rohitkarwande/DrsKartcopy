@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2, LifeBuoy, PlusCircle, CheckCircle2,
-  ChevronDown, ChevronUp, AlertCircle, HelpCircle
+  ChevronDown, ChevronUp, AlertCircle, HelpCircle, ShoppingBag
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -132,12 +133,19 @@ export function SupportTickets() {
           </p>
         </div>
 
-        <Button
-          onClick={() => setShowModal(true)}
-          className="sm:ml-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 rounded-xl h-11"
-        >
-          <PlusCircle className="h-4 w-4" /> Raise a Ticket
-        </Button>
+        <div className="flex items-center gap-3 flex-wrap sm:ml-auto">
+          <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 font-semibold gap-2 rounded-xl h-11">
+            <Link to="/search">
+              <ShoppingBag className="h-4 w-4" /> Browse Marketplace
+            </Link>
+          </Button>
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 rounded-xl h-11"
+          >
+            <PlusCircle className="h-4 w-4" /> Raise a Ticket
+          </Button>
+        </div>
       </div>
 
       {/* Tickets List */}

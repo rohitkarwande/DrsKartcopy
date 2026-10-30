@@ -4,7 +4,7 @@ const CATEGORIES = [
     'Laboratory Equipment', 'Surgical Equipment', 'Other'
 ];
 
-const CONDITIONS = ['Used', 'Refurbished', 'Spare'];
+const CONDITIONS = ['New', 'Used', 'Refurbished', 'Spare'];
 const STATUSES = ['Draft', 'Active', 'Sold', 'Archived'];
 
 module.exports = {

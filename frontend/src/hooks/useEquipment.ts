@@ -8,7 +8,7 @@ export const EQUIPMENT_CATEGORIES = [
   'Defibrillator', 'Laboratory Equipment', 'Surgical Equipment', 'Other'
 ] as const;
 
-export const EQUIPMENT_CONDITIONS = ['Used', 'Refurbished', 'Spare'] as const;
+export const EQUIPMENT_CONDITIONS = ['New', 'Used', 'Refurbished', 'Spare'] as const;
 export const EQUIPMENT_STATUSES = ['Draft', 'Active', 'Sold', 'Archived'] as const;
 
 export interface Equipment {

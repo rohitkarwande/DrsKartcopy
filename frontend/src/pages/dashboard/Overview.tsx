@@ -4,9 +4,10 @@ import { api } from "@/lib/api";
 import { Link } from "react-router-dom";
 import { 
   Package, MessageSquare, TrendingUp, PlusCircle, 
-  ShieldCheck, Loader2, ArrowRight, Eye, MousePointerClick, Sparkles
+  ShieldCheck, Loader2, ArrowRight, Eye, MousePointerClick, Sparkles, ShoppingBag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandMarqueeTicker } from "@/components/shared/BrandMarqueeTicker";
 
 function useUserDashboard() {
   return useQuery({
@@ -47,27 +48,38 @@ export function DashboardOverview() {
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">
               Your healthcare marketplace command center • 
               <span className="ml-2 font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-md uppercase tracking-wider text-xs">
-                {user?.role} Account
+                {user?.role === 'admin' ? 'Enterprise' : user?.role === 'seller' ? 'Seller' : 'Buyer'} Account
               </span>
             </p>
           </div>
-          {isSeller ? (
-            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 h-12 px-6 rounded-xl text-md font-semibold text-white">
-              <Link to="/sell">
-                <PlusCircle className="mr-2 h-5 w-5" />
-                List Equipment
+          <div className="flex flex-row items-center gap-2.5 sm:gap-3 flex-nowrap shrink-0 overflow-x-auto">
+            <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 h-10 sm:h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap shadow-sm">
+              <Link to="/search">
+                <ShoppingBag className="mr-1.5 h-4 w-4 shrink-0" />
+                Browse Marketplace
               </Link>
             </Button>
-          ) : (
-            <Button asChild variant="outline" className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 h-12 px-6 rounded-xl text-md font-semibold">
-              <Link to="/kyc">
-                <ShieldCheck className="mr-2 h-5 w-5" />
-                Become a Seller
-              </Link>
-            </Button>
-          )}
+            {isSeller ? (
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-700 h-10 sm:h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold text-white whitespace-nowrap shadow-sm">
+                <Link to="/sell">
+                  <PlusCircle className="mr-1.5 h-4 w-4 shrink-0" />
+                  List Equipment
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 h-10 sm:h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap shadow-sm">
+                <Link to="/kyc">
+                  <ShieldCheck className="mr-1.5 h-4 w-4 shrink-0" />
+                  Become a Seller
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Moving Medical Brands Marquee Ticker */}
+      <BrandMarqueeTicker variant="teal" className="rounded-2xl shadow-sm" />
 
       {/* Stats Cards */}
       <div className="grid gap-6 grid-cols-2 lg:grid-cols-4">

@@ -12,6 +12,8 @@ import { About } from "../pages/marketplace/About";
 import { Search } from "../pages/marketplace/Search";
 import { EquipmentDetails } from "../pages/marketplace/EquipmentDetails";
 import { Contact } from "../pages/marketplace/Contact";
+import { PrivacyPolicy } from "../pages/marketplace/PrivacyPolicy";
+import { TermsOfService } from "../pages/marketplace/TermsOfService";
 
 // Auth Pages
 import { AuthPage } from "../pages/auth/AuthPage";
@@ -43,6 +45,10 @@ export function AppRoutes() {
         <Route path="/search" element={<Search />} />
         <Route path="/equipment/:id" element={<EquipmentDetails />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/terms" element={<TermsOfService />} />
 
         {/* Authentication Routes */}
         <Route path="/login" element={<AuthPage />} />

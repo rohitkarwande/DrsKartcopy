@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMyServiceRequests, useCreateServiceRequest } from "@/hooks/useServices";
 import {
   Wrench,
@@ -9,6 +10,7 @@ import {
   AlertTriangle,
   History,
   ClipboardList,
+  ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +30,7 @@ export function ServiceBooking() {
 
   // Form states
   const [equipmentType, setEquipmentType] = useState("MRI Machine");
+  const [customEquipmentName, setCustomEquipmentName] = useState("");
   const [issueDescription, setIssueDescription] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -41,14 +44,23 @@ export function ServiceBooking() {
     setFormError("");
     setFormSuccess("");
 
+    if (equipmentType === "Other Medical Equipment" && !customEquipmentName.trim()) {
+      setFormError("Please enter the name of your equipment.");
+      return;
+    }
+
     if (!issueDescription.trim()) {
       setFormError("Please describe the issue you are experiencing.");
       return;
     }
 
+    const submittedEquipmentType = equipmentType === "Other Medical Equipment"
+      ? `Other (${customEquipmentName.trim()})`
+      : equipmentType;
+
     try {
       await createRequest.mutateAsync({
-        equipment_type: equipmentType,
+        equipment_type: submittedEquipmentType,
         issue_description: issueDescription,
         contact_name: contactName,
         contact_phone: contactPhone,
@@ -56,6 +68,7 @@ export function ServiceBooking() {
       });
 
       setFormSuccess("Your service request has been successfully booked! Our team will contact you shortly.");
+      setCustomEquipmentName("");
       setIssueDescription("");
       setContactName("");
       setContactPhone("");
@@ -69,14 +82,22 @@ export function ServiceBooking() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-          <Wrench className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-          Request Equipment Service
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Book certified engineers for repair, maintenance, calibration, or inspections of your medical equipment.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <Wrench className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+            Request Equipment Service
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            Book certified engineers for repair, maintenance, calibration, or inspections of your medical equipment.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 shrink-0">
+          <Link to="/search">
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            Browse Marketplace
+          </Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -122,6 +143,26 @@ export function ServiceBooking() {
                     className="w-full text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
+
+                {/* Conditional input when Other Medical Equipment is chosen */}
+                {equipmentType === "Other Medical Equipment" && (
+                  <div className="sm:col-span-2 animate-in fade-in duration-300 bg-emerald-50/50 dark:bg-emerald-950/20 p-3.5 rounded-xl border border-emerald-200/60 dark:border-emerald-800/60">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                      Name of Customer's Equipment <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={customEquipmentName}
+                      onChange={(e) => setCustomEquipmentName(e.target.value)}
+                      placeholder="e.g. Dental OPG Unit, Autoclave, Dialysis Machine, Endoscope..."
+                      className="w-full text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                      required
+                    />
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                      Please enter the specific name or model of your equipment so our certified engineers can prepare properly.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>

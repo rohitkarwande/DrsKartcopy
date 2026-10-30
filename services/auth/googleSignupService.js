@@ -1,7 +1,7 @@
 const db = require('../../config/db');
 const { tokenService } = require('./tokenService');
 const { authSecurityService } = require('./authSecurityService');
-const { getUserWithProfile } = require('./authUtils');
+const { getUserWithProfile, generateUniqueUsername } = require('./authUtils');
 
 class GoogleSignupService {
     /**
@@ -42,17 +42,24 @@ class GoogleSignupService {
             throw err;
         }
 
+        const defaultUsername = await generateUniqueUsername(db, { email, name });
+
         const insertResult = await db.query(
-            "INSERT INTO users (email, role, is_verified, status) VALUES ($1, 'user', TRUE, 'Active') RETURNING id, email, phone, role, is_verified",
-            [email]
+            "INSERT INTO users (email, username, role, is_verified, status) VALUES ($1, $2, 'user', TRUE, 'Active') RETURNING id, email, phone, username, role, is_verified",
+            [email, defaultUsername]
         );
         const user = insertResult.rows[0];
 
         if (name) {
             const { firstName, lastName } = this.splitName(name);
             await db.query(
-                'INSERT INTO user_profiles (user_id, first_name, last_name) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO NOTHING',
-                [user.id, firstName, lastName]
+                'INSERT INTO user_profiles (user_id, username, first_name, last_name) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username',
+                [user.id, defaultUsername, firstName, lastName]
+            );
+        } else {
+            await db.query(
+                'INSERT INTO user_profiles (user_id, username) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username',
+                [user.id, defaultUsername]
             );
         }
 

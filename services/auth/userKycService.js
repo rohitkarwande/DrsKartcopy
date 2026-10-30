@@ -6,8 +6,8 @@ class UserKycService {
      */
     async submitKyc({ userId, data, file, io, userContact }) {
         const { document_type, company_name } = data;
-        const document_url = data.document_url || null;
         const document_file_url = file ? `/uploads/kyc/${file.filename}` : null;
+        const document_url = (data.document_url && data.document_url.trim()) ? data.document_url.trim() : (document_file_url || null);
 
         if (!document_type) {
             const err = new Error('document_type is required');

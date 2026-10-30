@@ -15,6 +15,10 @@ router.post('/become-seller', userController.becomeSeller);
 router.get('/dashboard', userController.getDashboard);
 router.post('/add-contact', userController.addContact);
 router.post('/verify-contact', userController.verifyContact);
+router.get('/wishlist', userController.getWishlist);
+router.get('/wishlist/ids', userController.getWishlistIds);
+router.post('/wishlist/toggle/:equipmentId', userController.toggleWishlist);
+router.delete('/wishlist/:equipmentId', userController.removeFromWishlist);
 
 module.exports = router;
 

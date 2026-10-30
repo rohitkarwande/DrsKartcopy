@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EquipmentCard } from "@/components/shared/EquipmentCard";
 import { HeroCarousel } from "@/components/marketplace/HeroCarousel";
+import { BrandMarqueeTicker } from "@/components/shared/BrandMarqueeTicker";
 import { useEquipment } from "@/hooks/useEquipment";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureFlag } from "@/hooks/useFeatureFlags";
@@ -94,6 +95,9 @@ export function Home() {
           </div>
         </section>
       )}
+
+      {/* Moving Medical Brands Marquee Ticker */}
+      <BrandMarqueeTicker variant="teal" />
 
       {/* Categories */}
       <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12">

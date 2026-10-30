@@ -1,6 +1,6 @@
 const db = require('../../config/db');
 const { sendEmailOTP } = require('../../config/email');
-const { isEmail } = require('./authUtils');
+const { isEmail, generateUniqueUsername } = require('./authUtils');
 const { otpService } = require('./otpService');
 
 class EmailSignupService {
@@ -61,9 +61,11 @@ class EmailSignupService {
             throw err;
         }
 
+        const defaultUsername = await generateUniqueUsername(db, { email });
+
         const insertResult = await db.query(
-            'INSERT INTO users (email) VALUES ($1) RETURNING id',
-            [email]
+            'INSERT INTO users (email, username) VALUES ($1, $2) RETURNING id',
+            [email, defaultUsername]
         );
         const userId = insertResult.rows[0].id;
 

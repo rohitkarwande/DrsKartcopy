@@ -35,7 +35,7 @@ components:
           type: integer
         condition:
           type: string
-          enum: [Used, Refurbished, Spare]
+          enum: [New, Used, Refurbished, Spare]
         price:
           type: number
         city:
@@ -115,7 +115,7 @@ paths:
                   example: 2019
                 condition:
                   type: string
-                  enum: [Used, Refurbished, Spare]
+                  enum: [New, Used, Refurbished, Spare]
                 price:
                   type: number
                   example: 2500000
@@ -181,7 +181,7 @@ paths:
                   type: integer
                 condition:
                   type: string
-                  enum: [Used, Refurbished, Spare]
+                  enum: [New, Used, Refurbished, Spare]
                 price:
                   type: number
                 city:

@@ -52,7 +52,7 @@ class EquipmentDetailService {
             LEFT JOIN (
                 SELECT DISTINCT equipment_post_id, id FROM promotions WHERE status = 'Active' AND expires_at > NOW()
             ) promo ON promo.equipment_post_id = ep.id
-            WHERE ep.seller_id = $1`;
+            WHERE ep.seller_id = $1 AND ep.status != 'Archived'`;
 
         queryStr += sort === 'oldest' ? ` ORDER BY ep.created_at ASC` : ` ORDER BY ep.created_at DESC`;
         const offset = (page - 1) * limit;

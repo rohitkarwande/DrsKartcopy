@@ -5,6 +5,9 @@ const sendError = (res, message, status = 400) => res.status(status).json({ erro
 // 5. Create Equipment Post
 const createEquipment = async (req, res) => {
     try {
+        if (req.user && req.user.role !== 'seller' && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Only verified sellers can list equipment. Please complete KYC verification.' });
+        }
         const result = await equipmentService.createEquipment({
             sellerId: req.user.id,
             data: req.body,

@@ -8,7 +8,7 @@ import {
   ArrowRight, ArrowLeft, CheckCircle2, Loader2, 
   Grid, ListChecks, Image as ImageIcon, IndianRupee, Eye,
   Activity, FileDigit, Stethoscope, Thermometer,
-  ShieldCheck, Wrench, Package, MapPin, X
+  ShieldCheck, Wrench, Package, MapPin, X, Sparkles
 } from "lucide-react";
 import { useCreateEquipment, useSingleEquipment, useUpdateEquipment, EQUIPMENT_CATEGORIES, EQUIPMENT_CONDITIONS } from "@/hooks/useEquipment";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,6 +17,7 @@ import { WizardStepper } from "@/components/shared/WizardStepper";
 import type { WizardStep } from "@/components/shared/WizardStepper";
 import { UploadZone } from "@/components/shared/UploadZone";
 import { Badge } from "@/components/ui/badge";
+import { INDIAN_STATES, INDIAN_STATES_AND_CITIES } from "@/constants/locations";
 
 const STEPS: WizardStep[] = [
   { id: "category", label: "Category", icon: <Grid className="h-5 w-5" /> },
@@ -42,6 +43,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const CONDITION_INFO: Record<string, { label: string, desc: string, icon: React.ReactNode }> = {
+  New: { label: "New", desc: "Brand new & unused", icon: <Sparkles className="h-6 w-6 text-indigo-500" /> },
   Used: { label: "Used", desc: "In working condition", icon: <CheckCircle2 className="h-6 w-6 text-blue-500" /> },
   Refurbished: { label: "Refurbished", desc: "Restored to OEM specs", icon: <ShieldCheck className="h-6 w-6 text-emerald-500" /> },
   Spare: { label: "Spare Parts", desc: "Components or parts", icon: <Wrench className="h-6 w-6 text-amber-500" /> },
@@ -94,6 +96,8 @@ export function SellEquipment() {
     }
   }, [isEditing, existingData]);
 
+  const [customCity, setCustomCity] = useState("");
+
   const update = (field: string, value: any) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -102,8 +106,8 @@ export function SellEquipment() {
     if (currentStep === 0 && !formData.category) return setError("Please select a category.");
     if (currentStep === 1 && (!formData.title || !formData.brand || !formData.model || !formData.condition)) 
       return setError("Please fill in all required fields (Title, Brand, Model, Condition).");
-    if (currentStep === 3 && (!formData.price || !formData.city)) 
-      return setError("Price and City are required.");
+    if (currentStep === 3 && (!formData.price || !formData.state || !formData.city)) 
+      return setError("Price, State, and City are required.");
     
     setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -276,7 +280,7 @@ export function SellEquipment() {
                 {/* Condition Cards */}
                 <div className="space-y-1.5">
                   <Label className="text-sm">Equipment Condition <span className="text-red-500">*</span></Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {EQUIPMENT_CONDITIONS.map((cond) => {
                       const isSelected = formData.condition === cond;
                       const info = CONDITION_INFO[cond];
@@ -418,28 +422,77 @@ export function SellEquipment() {
                   )}
                 </div>
 
+                {/* State Dropdown - Asked First */}
                 <div className="space-y-2">
-                  <Label>City <span className="text-red-500">*</span></Label>
+                  <Label className="text-slate-900 font-semibold">State <span className="text-red-500">*</span></Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <Input
-                      value={formData.city}
-                      onChange={(e) => update("city", e.target.value)}
-                      placeholder="e.g. Mumbai"
-                      className="h-12 pl-10 bg-white"
-                    />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <select
+                      value={formData.state}
+                      onChange={(e) => {
+                        const newState = e.target.value;
+                        update("state", newState);
+                        update("city", "");
+                        setCustomCity("");
+                      }}
+                      className="w-full h-12 pl-10 pr-4 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
+                    >
+                      <option value="">-- Select State --</option>
+                      {INDIAN_STATES.map((st) => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-                
+
+                {/* City Dropdown - Asked Second based on State */}
                 <div className="space-y-2">
-                  <Label>State</Label>
-                  <Input
-                    value={formData.state}
-                    onChange={(e) => update("state", e.target.value)}
-                    placeholder="e.g. Maharashtra"
-                    className="h-12 bg-white"
-                  />
+                  <Label className="text-slate-900 font-semibold">City <span className="text-red-500">*</span></Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <select
+                      disabled={!formData.state}
+                      value={
+                        customCity || (formData.city && !INDIAN_STATES_AND_CITIES[formData.state]?.includes(formData.city))
+                          ? "Other"
+                          : formData.city
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "Other") {
+                          setCustomCity(formData.city || "Other");
+                          update("city", formData.city || "");
+                        } else {
+                          setCustomCity("");
+                          update("city", val);
+                        }
+                      }}
+                      className="w-full h-12 pl-10 pr-4 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-100 disabled:text-slate-400 shadow-sm"
+                    >
+                      <option value="">{formData.state ? "-- Select City --" : "-- Select State First --"}</option>
+                      {formData.state && INDIAN_STATES_AND_CITIES[formData.state]?.map((ct) => (
+                        <option key={ct} value={ct}>{ct}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+
+                {/* Optional Custom City input if "Other" is selected or city not in standard list */}
+                {(customCity !== "" || (formData.state && formData.city && !INDIAN_STATES_AND_CITIES[formData.state]?.includes(formData.city))) && (
+                  <div className="space-y-2 md:col-span-2 bg-white p-4 rounded-xl border border-slate-200 animate-in fade-in duration-300">
+                    <Label className="text-slate-900 font-semibold">Specify City Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => {
+                        setCustomCity(e.target.value);
+                        update("city", e.target.value);
+                      }}
+                      placeholder="Enter city or district name"
+                      className="h-11 bg-white"
+                    />
+                    <p className="text-xs text-slate-500">Your city will be listed with your equipment location.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

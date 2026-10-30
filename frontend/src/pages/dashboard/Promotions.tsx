@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMyListings } from "@/hooks/useEquipment";
 import type { Equipment } from "@/hooks/useEquipment";
 import { api, API_BASE_URL } from "@/lib/api";
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Loader2, Sparkles, TrendingUp, CalendarDays, CheckCircle2,
   Clock, XCircle, ChevronRight, Megaphone, Star,
-  Eye, MousePointerClick, ExternalLink, BarChart3,
+  Eye, MousePointerClick, ExternalLink, BarChart3, ShoppingBag,
 } from "lucide-react";
 
 // ─── API hooks ──────────────────────────────────────────────────────────────
@@ -159,16 +160,24 @@ export function Promotions() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <div className="p-2 bg-amber-100 dark:bg-amber-950/60 rounded-xl">
-            <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2 bg-amber-100 dark:bg-amber-950/60 rounded-xl">
+              <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Promotions & Banner Analytics</h1>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Promotions & Banner Analytics</h1>
+          <p className="text-slate-500 text-sm mt-1 ml-12">
+            Boost equipment visibility and track live impressions, views, and clicks on your products and sponsored hero banners.
+          </p>
         </div>
-        <p className="text-slate-500 text-sm mt-1 ml-12">
-          Boost equipment visibility and track live impressions, views, and clicks on your products and sponsored hero banners.
-        </p>
+        <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 shrink-0">
+          <Link to="/search">
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            Browse Marketplace
+          </Link>
+        </Button>
       </div>
 
       {/* ─── Sponsored Banner Performance Analytics Card ──────────────────────── */}

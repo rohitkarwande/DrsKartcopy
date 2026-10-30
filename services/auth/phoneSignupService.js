@@ -1,6 +1,6 @@
 const db = require('../../config/db');
 const { sendOTP: sendPhoneOTP } = require('../../config/twilio');
-const { sanitizePhone } = require('./authUtils');
+const { sanitizePhone, generateUniqueUsername } = require('./authUtils');
 const { otpService } = require('./otpService');
 
 class PhoneSignupService {
@@ -63,9 +63,11 @@ class PhoneSignupService {
             throw err;
         }
 
+        const defaultUsername = await generateUniqueUsername(db, { phone });
+
         const insertResult = await db.query(
-            'INSERT INTO users (phone) VALUES ($1) RETURNING id',
-            [phone]
+            'INSERT INTO users (phone, username) VALUES ($1, $2) RETURNING id',
+            [phone, defaultUsername]
         );
         const userId = insertResult.rows[0].id;
 

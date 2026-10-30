@@ -1,12 +1,12 @@
 import { useSellerInquiries, useBuyerInquiries, useUpdateInquiryStatus } from "@/hooks/useInquiries";
 import { useCreateChatRoom } from "@/hooks/useChat";
-import { Loader2, MessageSquare, Check, X } from "lucide-react";
+import { Loader2, MessageSquare, Check, X, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "@/components/shared/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export function Inquiries() {
   const { data: sellerInquiries, isLoading: isLoadingSeller } = useSellerInquiries();
@@ -172,11 +172,19 @@ export function Inquiries() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Inquiries</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your incoming leads and outgoing equipment requests.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Inquiries</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage your incoming leads and outgoing equipment requests.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 shrink-0">
+          <Link to="/search">
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            Browse Marketplace
+          </Link>
+        </Button>
       </div>
 
       <Tabs defaultValue="received" className="w-full">
